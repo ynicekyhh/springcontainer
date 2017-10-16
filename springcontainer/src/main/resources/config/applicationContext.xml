@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- Bean 객체를 등록하지 않고, annotation을 사용하는 방법 -->
+	<context:annotation-config />
+	<context:component-scan base-package="com.bigdata2017.springcontainer">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Component" />
+	</context:component-scan>
+
+	<!-- 이렇게 클래스 경로를 적어주는 것으로 User 객체를 spring Container에 생성하게 된다. -->
+	<bean id="user" name="usr" class="com.bigdata2017.springcontainer.User" />
+	<bean id="user4" class="com.bigdata2017.springcontainer.User" />
+
+	<!-- User객체를 생성할 때, constructor-arg의 value값을 주면, 생성자에 자동으로 value값이 파라미터로 
+		들어간다. 따라서 User객체 생성자의 타입과 맞춰주지 않으면 에러 -->
+	<!-- constructor-arg의 파라미터 순서를 바꿔주면 에러가 발생하는데(타입이 안맞으니), 이 때, index로 순서를 
+		정해주면 에러를 피할 수 있다. -->
+	<bean id="user5" class="com.bigdata2017.springcontainer.User">
+		<constructor-arg index="1" value="마이콜" />
+		<constructor-arg index="0" value="1" />
+	</bean>
+
+	<!-- user5에서 파라미터를 constructor-arg로 등록했다면, property 태그를 이용하면 setter를 사용할 
+		수 있다. 따라서 setNo(), setName()이 실행된다. -->
+	<!-- 따라서 property를 사용하려면 User객체에 setter가 없다면 에러가 발생한다. -->
+	<bean id="user6" class="com.bigdata2017.springcontainer.User">
+		<property name="no" value="2" />
+		<property name="name" value="또치" />
+	</bean>
+
+	<!-- 아래의 friend7 bean객체가 user7 bean객체보다 나중에 위치하더라도 spring이 순서에 관계없이 읽어서 동작한다. -->
+	<bean id="friend7" class="com.bigdata2017.springcontainer.Friend">
+		<constructor-arg value="희동이" />
+	</bean>
+
+	<bean id="user7" class="com.bigdata2017.springcontainer.User">
+		<property name="no" value="3" />
+		<property name="name" value="도우넛" />
+		<!-- 이런식으로 Bean설정만으로 DI를 할 수 있다. -->
+		<!-- 이렇게 해 준 후, Friend에 @Component를 달아 등록 후에 User에서 Friend객체를 @Autowired를 해 주면 알아서 적용되나, 현제는 예제가 많아 꼬여서 등록되지 않는다. -->
+		<!-- <property name="friend" ref="friend7" /> -->
+		<property name="friend" ref="friend7" />
+	</bean>
+
+	<bean id="user8" class="com.bigdata2017.springcontainer.User">
+		<property name="no" value="3" />
+		<property name="name" value="도우넛" />
+		<!-- 이렇게 설정하면 바깥에서 여기에 등록되는 bean을 꺼내어 사용할 수 없으니, data같은 녀석들은 이렇게 사용하는 것이 좋다. -->
+		<property name="friend">
+			<bean id="friend7" class="com.bigdata2017.springcontainer.Friend">
+				<constructor-arg value="길동" />
+			</bean>
+		</property>
+		<property name="friends">
+			<list>
+				<!-- 만약 friends 리스트가 String 리스트가 아닌 Friend객체의 리스트였다면 아래의 value를 Friend객체로 하나씩 받을 수 있게 설정해야함(ppt참고) -->
+				<value>도우넛</value>
+				<value>마이콜</value>
+				<value>또치</value>
+			</list>
+		</property>
+	</bean>
+	<!-- DB등은 개발자가 annotation으로 쓸지 말지 모르니까 괜히 anntation으로 등록시켜 놓기 보다는 Bean설정으로 
+		등록을 시킨다.(annotation으로 할 수도 있으나 하지 않음) -->
+
+</beans>
